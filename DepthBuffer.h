@@ -9,48 +9,34 @@
 namespace Islander
 {
 
-inline uint8_t ToU8Color(const float value)
-{
-	return static_cast<uint8_t>(
-		std::max(0, std::min(255, static_cast<int>(value * 256.0f)))
-	);
-}
-
 class DepthBuffer
 {
 public:
-	DepthBuffer(const size_t width, const size_t height)
+	DepthBuffer(const int width, const int height)
 		: m_Width(width), m_Height(height)
-		, m_Data(width * height)
+		, m_Data(static_cast<size_t>(width * height))
 	{
 	}
 
-	class Range
+	// buffer[{i, j}] to access row i col j
+	const float& operator[](const std::pair<int, int> index) const
 	{
-	public:
-		float& operator[](size_t index) const
-		{
-			assert(index < m_Width);
-			return m_Start[index];
-		}
-
-		friend class DepthBuffer;
-	private:
-		Range(float* start, const size_t width)
-			: m_Start(start), m_Width(width) {}
-		float* m_Start;
-		size_t m_Width;
-	};
-
-	// buffer[i][j] to access row i col j
-	Range operator[](const size_t index)
-	{
-		assert(index < m_Height);
-		return { m_Data.data() + index * m_Width, m_Width };
+		assert(index.first >= 0 && index.first < m_Height);
+		assert(index.second >= 0 && index.second < m_Width);
+		return m_Data[index.first * m_Width + index.second];
 	}
-	void DumpBmp(const std::string& path, const BufferElement& colorElement);
+
+	// buffer[{i, j}] to access row i col j
+	float& operator[](const std::pair<int, int> index)
+	{
+		assert(index.first >= 0 && index.first < m_Height);
+		assert(index.second >= 0 && index.second < m_Width);
+		return m_Data[index.first * m_Width + index.second];
+	}
+
+	void DumpBmp(const std::string& path) const;
 private:
-	size_t m_Width, m_Height;
+	int m_Width, m_Height;
 	std::vector<float> m_Data;
 };
 	

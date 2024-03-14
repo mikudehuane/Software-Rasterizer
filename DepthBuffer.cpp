@@ -2,63 +2,103 @@
 
 #include <array>
 #include <fstream>
+#include <iostream>
+
+namespace
+{
+
+uint8_t ToU8Color(const float value)
+{
+    return static_cast<uint8_t>(
+        std::max(0, std::min(255, static_cast<int>(value * 256.0f)))
+    );
+}
+
+#pragma pack(push, 1)
+// ReSharper disable CppDeclaratorNeverUsed
+struct BmpHeader {
+    uint16_t signature; // BM (0x42, 0x4D)
+    uint32_t fileSize; // File size in bytes
+    uint16_t reserved1; // Reserved (0)
+    uint16_t reserved2; // Reserved (0)
+    uint32_t dataOffset; // Offset to image data in bytes
+    uint32_t headerSize; // Header size in bytes (40)
+    uint32_t width; // Image width in pixels
+    uint32_t height; // Image height in pixels
+    uint16_t planes; // Number of color planes (1)
+    uint16_t bitDepth; // Bits per pixel (24)
+    uint32_t compression; // Compression type (0 for uncompressed)
+    uint32_t imageSize; // Image size in bytes (can be 0 for uncompressed)
+    uint32_t xPixelsPerMeter; // Horizontal resolution in pixels/meter (can be 0)
+    uint32_t yPixelsPerMeter; // Vertical resolution in pixels/meter (can be 0)
+    uint32_t colorsUsed; // Number of colors in the palette (can be 0 for full color images)
+    uint32_t colorsImportant; // Number of important colors (can be 0)
+};
+// ReSharper restore CppDeclaratorNeverUsed
+#pragma pack(pop)
+	
+}
 
 namespace Islander
 {
 
-void DepthBuffer::DumpBmp(const std::string& path, const BufferElement& colorElement)
+void writeImageFromArray(const char* filename, int** imageArray, int width, int height) {
+    // Open the file for writing
+    std::ofstream outFile(filename, std::ios::binary);
+
+    // Close the file
+    outFile.close();
+}
+
+void DepthBuffer::DumpBmp(const std::string& path) const
 {
-    int w = m_Width;
-    int h = m_Height;
+    constexpr int nChannel = 3;
+    const int rowPadding = (4 - (m_Width * 3) % 4) % 4; // BMP requires rows to be padded to a multiple of 4 bytes
 
-    FILE* f;
-    unsigned char* img = NULL;
-    int filesize = 54 + 3 * w * h;  //w is your image width, h is image height, both int
+    std::ofstream bmpFile(path, std::ios::binary);
+    if (!bmpFile) {
+        std::cerr << "Error: Unable to open file " << path << std::endl;
+        return;
+    }
 
-    img = (unsigned char*)malloc(3 * w * h);
-    memset(img, 0, 3 * w * h);
+    const uint32_t fileSize = static_cast<uint32_t>(
+        sizeof(BmpHeader) + static_cast<size_t>(m_Width * nChannel + rowPadding) * m_Height
+	);
+    BmpHeader header = {
+        .signature = 0x4D42, // BM
+        .fileSize = fileSize,
+        .reserved1 = 0,
+        .reserved2 = 0,
+        .dataOffset = sizeof(BmpHeader),
+        .headerSize = 40,
+        .width = static_cast<uint32_t>(m_Width),
+        .height = static_cast<uint32_t>(m_Height),
+        .planes = 1,
+        .bitDepth = 24,
+        .compression = 0,
+        .imageSize = 0,
+        .xPixelsPerMeter = 0,
+        .yPixelsPerMeter = 0,
+        .colorsUsed = 0,
+        .colorsImportant = 0
+    };
 
-    for (int i = 0; i < w; i++)
+    bmpFile.write(reinterpret_cast<char*>(&header), sizeof(header));
+
+	constexpr std::array<char,3> padding = { 0, 0, 0 };
+    // i: high -> top; j: high -> right
+    const float* data = m_Data.data();
+    for (int i = 0; i < m_Height; ++i)
     {
-        for (int j = 0; j < h; j++)
+        for (int j = 0; j < m_Width; ++j)
         {
-            int x = i, y = (h - 1) - j;
-            int r = 0, g = 255, b = 0;
-            img[(x + y * w) * 3 + 2] = (unsigned char)(r);
-            img[(x + y * w) * 3 + 1] = (unsigned char)(g);
-            img[(x + y * w) * 3 + 0] = (unsigned char)(b);
+            const char color = static_cast<char>(ToU8Color(*data));
+            std::array pixel = { color, color, color };
+            bmpFile.write(pixel.data(), nChannel);
+            ++data;
         }
+        bmpFile.write(padding.data(), rowPadding); // Padding
     }
-
-    unsigned char bmpfileheader[14] = { 'B','M', 0,0,0,0, 0,0, 0,0, 54,0,0,0 };
-    unsigned char bmpinfoheader[40] = { 40,0,0,0, 0,0,0,0, 0,0,0,0, 1,0, 24,0 };
-    unsigned char bmppad[3] = { 0,0,0 };
-
-    bmpfileheader[2] = (unsigned char)(filesize);
-    bmpfileheader[3] = (unsigned char)(filesize >> 8);
-    bmpfileheader[4] = (unsigned char)(filesize >> 16);
-    bmpfileheader[5] = (unsigned char)(filesize >> 24);
-
-    bmpinfoheader[4] = (unsigned char)(w);
-    bmpinfoheader[5] = (unsigned char)(w >> 8);
-    bmpinfoheader[6] = (unsigned char)(w >> 16);
-    bmpinfoheader[7] = (unsigned char)(w >> 24);
-    bmpinfoheader[8] = (unsigned char)(h);
-    bmpinfoheader[9] = (unsigned char)(h >> 8);
-    bmpinfoheader[10] = (unsigned char)(h >> 16);
-    bmpinfoheader[11] = (unsigned char)(h >> 24);
-
-    fopen_s(&f, path.c_str(), "wb");
-    fwrite(bmpfileheader, 1, 14, f);
-    fwrite(bmpinfoheader, 1, 40, f);
-    for (int i = 0; i < h; i++)
-    {
-        fwrite(img + (w * (h - i - 1) * 3), 3, w, f);
-        fwrite(bmppad, 1, (4 - (w * 3) % 4) % 4, f);
-    }
-
-    free(img);
-    fclose(f);
 }
 
 }
