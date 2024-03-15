@@ -42,14 +42,6 @@ struct BmpHeader {
 namespace Islander
 {
 
-void writeImageFromArray(const char* filename, int** imageArray, int width, int height) {
-    // Open the file for writing
-    std::ofstream outFile(filename, std::ios::binary);
-
-    // Close the file
-    outFile.close();
-}
-
 void DepthBuffer::DumpBmp(const std::string& path) const
 {
     constexpr int nChannel = 3;

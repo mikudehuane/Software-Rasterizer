@@ -1,7 +1,6 @@
 #pragma once
 
-#include "Buffer.h"
-
+#include <cassert>
 #include <cstdint>
 #include <string>
 #include <vector>
