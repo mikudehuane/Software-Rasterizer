@@ -49,10 +49,10 @@ int main()
 
 	Normalize(triangles);
 
-	Islander::DepthBuffer renderTarget(720, 720);
+	Islander::DepthBuffer renderTarget(1080, 1080);
 
 	Rasterize(triangles, renderTarget);
 
-	renderTarget.DumpBmp("tmp.bmp");
+	renderTarget.DumpBmp("result.bmp");
 }
 

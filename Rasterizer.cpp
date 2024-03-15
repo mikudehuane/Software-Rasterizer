@@ -59,6 +59,8 @@ public:
 
 	void Rasterize(const ScreenTriangle& triangle) const
 	{
+		constexpr float eps = 1e-7f;
+
 		const Vec2& v0 = *reinterpret_cast<const Vec2*>(&triangle.v0);
 		const Vec2& v1 = *reinterpret_cast<const Vec2*>(&triangle.v1);
 		const Vec2& v2 = *reinterpret_cast<const Vec2*>(&triangle.v2);
@@ -74,9 +76,12 @@ public:
 
 		// lower half
 		{
-			const float tLeft = (v2.x - v0.x) / (v2.y - v0.y);
-			const float tRight = (v1.x - v0.x) / (v1.y - v0.y);
-			assert(tLeft <= tRight);
+			float tLeft = (v2.x - v0.x) / (v2.y - v0.y + eps);
+			float tRight = (v1.x - v0.x) / (v1.y - v0.y + eps);
+			if (tLeft > tRight)
+			{
+				std::swap(tLeft, tRight);
+			}
 			for (int y = static_cast<int>(yMin); y < static_cast<int>(yMid); ++y)
 			{
 				const float yCoord = static_cast<float>(y) + 0.5f;
@@ -115,8 +120,8 @@ public:
 
 		// higher half
 		{
-			float tLeft = (vMid.x - vTop.x) / (vMid.y - vTop.y);
-			float tRight = (v0.x - vTop.x) / (v0.y - vTop.y);
+			float tLeft = (vMid.x - vTop.x) / (vMid.y - vTop.y + eps);
+			float tRight = (v0.x - vTop.x) / (v0.y - vTop.y + eps);
 			if (tLeft < tRight)
 			{
 				std::swap(tLeft, tRight);
