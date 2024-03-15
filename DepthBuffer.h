@@ -13,7 +13,7 @@ class DepthBuffer
 public:
 	DepthBuffer(const int width, const int height)
 		: m_Width(width), m_Height(height)
-		, m_Data(static_cast<size_t>(width * height))
+		, m_Data(static_cast<size_t>(width * height), -1.0f)
 	{
 	}
 

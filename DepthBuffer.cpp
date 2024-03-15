@@ -7,10 +7,11 @@
 namespace
 {
 
+// -1~1 -> 0~255
 uint8_t ToU8Color(const float value)
 {
     return static_cast<uint8_t>(
-        std::max(0, std::min(255, static_cast<int>(value * 256.0f)))
+        std::max(0, std::min(255, static_cast<int>((value + 1.0f) * 128.0f)))
     );
 }
 

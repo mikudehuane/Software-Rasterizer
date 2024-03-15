@@ -8,6 +8,7 @@ int main()
 
 	std::vector<Islander::ScreenTriangle> triangles = {
 		{ { 0.1f, 0.1f, 0.1f }, { 0.9f, 0.4f, 0.9f }, { 0.5f, 0.9f, 0.9f } },
+		{ { -0.9f, -0.9f, -1.0f }, { 0.0f, 1.0f, 0.5f }, { 1.0f, 0.7f, -0.5f } }
 	};
 	Rasterize(triangles, renderTarget);
 
