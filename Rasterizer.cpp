@@ -1,5 +1,7 @@
 #include "Rasterizer.h"
 
+#include <iostream>
+
 namespace Islander
 {
 
@@ -31,10 +33,16 @@ public:
 
 	void RasterizeAll()
 	{
+		int count = 0;
 		for (ScreenTriangle& triangle : m_Triangles)
 		{
 			TransformToScreen(triangle);
 			Rasterize(triangle);
+			++count;
+			if (count % 100 == 0)
+			{
+				std::cout << count << " / " << m_Triangles.size() << std::endl;
+			}
 		}
 	}
 

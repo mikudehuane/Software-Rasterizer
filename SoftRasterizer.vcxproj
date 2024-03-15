@@ -130,10 +130,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Geometry.h" />
+    <ClInclude Include="Loader.h" />
     <ClInclude Include="Rasterizer.h" />
     <ClInclude Include="DepthBuffer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Loader.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Rasterizer.cpp" />
     <ClCompile Include="DepthBuffer.cpp" />
