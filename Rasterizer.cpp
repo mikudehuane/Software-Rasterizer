@@ -57,9 +57,9 @@ public:
 		const Vec2& vMid = v1.y < v2.y ? v1 : v2;  // y is middle
 		const Vec2& vTop = v1.y < v2.y ? v2 : v1;  // y is highest
 
-		const float yMin = triangle.v0.y;
-		const float yMid = vMid.y;
-		const float yMax = vTop.y;
+		const float yMin = std::max(v0.y, 0.0f);
+		const float yMax = std::min(vTop.y, static_cast<float>(m_Buffer->Height() - 1));
+		const float yMid = std::max(yMin, std::min(yMax, vMid.y));
 
 		// v01 x v02
 		const float area = Cross(v1 - v0, v2 - v0);
@@ -72,9 +72,12 @@ public:
 			for (int y = static_cast<int>(yMin); y < static_cast<int>(yMid); ++y)
 			{
 				const float yCoord = static_cast<float>(y) + 0.5f;
-				const float yDiff = yCoord - yMin;
-				const float xMin = tLeft * yDiff + triangle.v0.x;
-				const float xMax = tRight * yDiff + triangle.v0.x;
+				const float yDiff = yCoord - v0.y;
+				float xMin = tLeft * yDiff + triangle.v0.x;
+				float xMax = tRight * yDiff + triangle.v0.x;
+				xMin = std::max(0.0f, xMin);
+				xMax = std::min(static_cast<float>(m_Buffer->Width() - 1), xMax);
+
 				for (int x = static_cast<int>(xMin); static_cast<float>(x) <= xMax; ++x)
 				{
 					// pixel (x, y): coordinate (x + 0.5, y + 0.5)
@@ -115,8 +118,11 @@ public:
 			{
 				const float yCoord = static_cast<float>(y) + 0.5f;
 				const float yDiff = yCoord - vTop.y;
-				const float xMin = tLeft * yDiff + vTop.x;
-				const float xMax = tRight * yDiff + vTop.x;
+				float xMin = tLeft * yDiff + vTop.x;
+				float xMax = tRight * yDiff + vTop.x;
+				xMin = std::max(0.0f, xMin);
+				xMax = std::min(static_cast<float>(m_Buffer->Width() - 1), xMax);
+
 				for (int x = static_cast<int>(xMin); x <= static_cast<int>(xMax); ++x)
 				{
 					// pixel (x, y): coordinate (x + 0.5, y + 0.5)
