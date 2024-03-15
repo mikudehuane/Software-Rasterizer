@@ -128,6 +128,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Geometry.h" />
     <ClInclude Include="Rasterizer.h" />
     <ClInclude Include="DepthBuffer.h" />
   </ItemGroup>

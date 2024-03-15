@@ -1,15 +1,17 @@
 #include "DepthBuffer.h"
+#include "Geometry.h"
+#include "Rasterizer.h"
 
 int main()
 {
 	Islander::DepthBuffer renderTarget(100, 100);
-	for (int i = 0; i < 100; ++i)
-	{
-		for (int j = 0; j < 100; ++j)
-		{
-			renderTarget[{i, j}] = i * 0.005f + j * 0.005f;
-		}
-	}
-	renderTarget.DumpBmp("result.bmp");
+
+	std::vector<Islander::ScreenTriangle> triangles = {
+		{ { 10, 10, 0 }, { 90, 10, 10 }, { 50, 90, 20 } },
+		{ { 10, 10, 0 }, { 50, 90, 20 }, { 90, 10, 10 } }
+	};
+	Rasterize(triangles, renderTarget);
+
+	renderTarget.DumpBmp("tmp.bmp");
 }
 
