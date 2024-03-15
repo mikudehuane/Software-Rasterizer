@@ -33,6 +33,9 @@ public:
 		return m_Data[index.first * m_Width + index.second];
 	}
 
+	[[nodiscard]] int Width() const { return m_Width; }
+	[[nodiscard]] int Height() const { return m_Height; }
+
 	void DumpBmp(const std::string& path) const;
 private:
 	int m_Width, m_Height;

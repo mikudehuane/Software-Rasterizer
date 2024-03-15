@@ -4,11 +4,10 @@
 
 int main()
 {
-	Islander::DepthBuffer renderTarget(100, 100);
+	Islander::DepthBuffer renderTarget(1960, 1080);
 
 	std::vector<Islander::ScreenTriangle> triangles = {
-		{ { 10, 10, 0 }, { 90, 10, 10 }, { 50, 90, 20 } },
-		{ { 10, 10, 0 }, { 50, 90, 20 }, { 90, 10, 10 } }
+		{ { 0.1f, 0.1f, 0.1f }, { 0.9f, 0.4f, 0.9f }, { 0.5f, 0.9f, 0.9f } },
 	};
 	Rasterize(triangles, renderTarget);
 
