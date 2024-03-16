@@ -18,13 +18,13 @@
     <ClInclude Include="Rasterizer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="DepthBuffer.h">
+    <ClInclude Include="Buffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Geometry.h">
+    <ClInclude Include="Math.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Loader.h">
+    <ClInclude Include="Model.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -35,10 +35,10 @@
     <ClCompile Include="Rasterizer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="DepthBuffer.cpp">
+    <ClCompile Include="Buffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Loader.cpp">
+    <ClCompile Include="Model.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

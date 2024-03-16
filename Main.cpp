@@ -1,11 +1,11 @@
+#include <filesystem>
 #include <iostream>
 
-#include "DepthBuffer.h"
-#include "Geometry.h"
-#include "Loader.h"
+#include "Buffer.h"
+#include "Model.h"
 #include "Rasterizer.h"
 
-void Normalize(std::vector<Islander::ScreenTriangle>& triangles)
+void Normalize(Islander::Model& model)
 {
 	// check the x, y, z range
 	float xMin = std::numeric_limits<float>::max();
@@ -14,18 +14,21 @@ void Normalize(std::vector<Islander::ScreenTriangle>& triangles)
 	float yMax = std::numeric_limits<float>::min();
 	float zMin = std::numeric_limits<float>::max();
 	float zMax = std::numeric_limits<float>::min();
-	for (const Islander::ScreenTriangle& triangle : triangles)
+	for (const Islander::Mesh& mesh : model.meshes)
 	{
-		xMin = std::min({ xMin, triangle.v0.x, triangle.v1.x, triangle.v2.x });
-		xMax = std::max({ xMax, triangle.v0.x, triangle.v1.x, triangle.v2.x });
-		yMin = std::min({ yMin, triangle.v0.y, triangle.v1.y, triangle.v2.y });
-		yMax = std::max({ yMax, triangle.v0.y, triangle.v1.y, triangle.v2.y });
-		zMin = std::min({ zMin, triangle.v0.z, triangle.v1.z, triangle.v2.z });
-		zMax = std::max({ zMax, triangle.v0.z, triangle.v1.z, triangle.v2.z });
+		for (const Islander::Triangle& triangle : mesh.triangles)
+		{
+			xMin = std::min({ xMin, triangle.v0.position.x, triangle.v1.position.x, triangle.v2.position.x });
+			xMax = std::max({ xMax, triangle.v0.position.x, triangle.v1.position.x, triangle.v2.position.x });
+			yMin = std::min({ yMin, triangle.v0.position.y, triangle.v1.position.y, triangle.v2.position.y });
+			yMax = std::max({ yMax, triangle.v0.position.y, triangle.v1.position.y, triangle.v2.position.y });
+			zMin = std::min({ zMin, triangle.v0.position.z, triangle.v1.position.z, triangle.v2.position.z });
+			zMax = std::max({ zMax, triangle.v0.position.z, triangle.v1.position.z, triangle.v2.position.z });
+		}
 	}
-	std::cout << "x: " << xMin << " ~ " << xMax << std::endl;
-	std::cout << "y: " << yMin << " ~ " << yMax << std::endl;
-	std::cout << "z: " << zMin << " ~ " << zMax << std::endl;
+	//std::cout << "x: " << xMin << " ~ " << xMax << std::endl;
+	//std::cout << "y: " << yMin << " ~ " << yMax << std::endl;
+	//std::cout << "z: " << zMin << " ~ " << zMax << std::endl;
 	const float extent = std::max({ xMax - xMin, yMax - yMin });
 
 	// normalize x, y to -1 ~ 1
@@ -35,24 +38,25 @@ void Normalize(std::vector<Islander::ScreenTriangle>& triangles)
 			p.y = (p.y - (yMin + yMax) / 2) / (extent / 2);
 			p.z = (p.z - (zMin + zMax) / 2) / ((zMax - zMin) / 2);
 		};
-	for (Islander::ScreenTriangle& triangle : triangles)
+	for (Islander::Mesh& mesh : model.meshes)
 	{
-		normalize(triangle.v0);
-		normalize(triangle.v1);
-		normalize(triangle.v2);
+		for (Islander::Triangle& triangle : mesh.triangles)
+		{
+			normalize(triangle.v0.position);
+			normalize(triangle.v1.position);
+			normalize(triangle.v2.position);
+		}
 	}
 }
 
 int main()
 {
-	std::vector<Islander::ScreenTriangle> triangles = Islander::LoadMesh("Assets/nanosuit.obj");
+	Islander::Model model = Islander::LoadModel("Assets/nanosuit.obj");
 
-	Normalize(triangles);
+	Normalize(model);
 
-	Islander::DepthBuffer renderTarget(1080, 1080);
-
-	Rasterize(triangles, renderTarget);
-
-	renderTarget.DumpBmp("result.bmp");
+	Islander::Rasterizer rasterizer(720, 720);
+	rasterizer.Render(model);
+	rasterizer.GetDepthBuffer().DumpBmp("depth.bmp");
 }
 

@@ -1,4 +1,4 @@
-#include "DepthBuffer.h"
+#include "Buffer.h"
 
 #include <array>
 #include <fstream>
@@ -8,11 +8,19 @@ namespace
 {
 
 // -1~1 -> 0~255
-uint8_t ToU8Color(const float value)
+uint8_t DepthToColor(const float value)
 {
     return static_cast<uint8_t>(
         std::max(0, std::min(255, static_cast<int>((value + 1.0f) * 128.0f)))
     );
+}
+
+// 0~1 -> 0~255
+uint8_t ToColor(const float value)
+{
+	return static_cast<uint8_t>(
+        std::max(0, std::min(255, static_cast<int>(value * 256.0f)))
+	);
 }
 
 #pragma pack(push, 1)
@@ -85,7 +93,7 @@ void DepthBuffer::DumpBmp(const std::string& path) const
     {
         for (int j = 0; j < m_Width; ++j)
         {
-            const char color = static_cast<char>(ToU8Color(*data));
+            const char color = static_cast<char>(DepthToColor(*data));
             std::array pixel = { color, color, color };
             bmpFile.write(pixel.data(), nChannel);
             ++data;
@@ -94,5 +102,11 @@ void DepthBuffer::DumpBmp(const std::string& path) const
     }
 }
 
+Color::Color(const Vec3& color)
+	: r(ToColor(color.x))
+    , g(ToColor(color.y))
+    , b(ToColor(color.z))
+{
+}
 }
 
