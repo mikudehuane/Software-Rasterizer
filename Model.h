@@ -10,6 +10,8 @@
 namespace Islander
 {
 
+class ColorBuffer;
+
 struct Material
 {
 	float ns;
@@ -17,9 +19,9 @@ struct Material
 	float ni;
 	float d;
 	int illum;
-	std::string mapKd;
-	std::string mapBump;
-	std::string mapKs;
+	std::shared_ptr<ColorBuffer> mapKd;
+	std::shared_ptr<ColorBuffer> mapBump;
+	std::shared_ptr<ColorBuffer> mapKs;
 };
 
 struct Vertex

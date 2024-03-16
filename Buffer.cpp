@@ -108,5 +108,5 @@ Color::Color(const Vec3& color)
     , b(ToColor(color.z))
 {
 }
-}
 
+}

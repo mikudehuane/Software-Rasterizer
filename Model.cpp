@@ -6,14 +6,51 @@
 #include <regex>
 #include <filesystem>
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
 #include "Math.h"
+#include "Buffer.h"
 
 namespace Islander
 {
 
+static std::shared_ptr<ColorBuffer> LoadPngTexture(const std::filesystem::path& path)
+{
+	int width, height, nChannel;
+	const std::string p = path.string();
+	unsigned char* data = stbi_load(p.c_str(), &width, &height, &nChannel, 0);
+	if (!data)
+	{
+		std::cerr << "Error: Unable to load file " << path << std::endl;
+		return nullptr;
+	}
+	assert(nChannel == 3 || nChannel == 4);
+
+	auto buffer = std::make_shared<ColorBuffer>(width, height);
+	for (int i = 0; i < height; ++i)
+	{
+		for (int j = 0; j < width; ++j)
+		{
+			const int index = (i * width + j) * nChannel;
+			Color color(
+				data[index], data[index + 1], data[index + 2], 255
+			);
+			if (nChannel == 4)
+			{
+				color.a = data[index + 3];
+			}
+			(*buffer)[{i, j}] = color;
+		}
+	}
+
+	stbi_image_free(data);
+	return buffer;
+}
+
 using MaterialLib = std::map<std::string, std::shared_ptr<Material>>;
 
-static MaterialLib LoadMaterialLib(const std::string& path)
+static MaterialLib LoadMaterialLib(const std::filesystem::path& path)
 {
 	MaterialLib lib;
 	std::regex newmtlRegex(R"(newmtl (.+))");
@@ -83,11 +120,40 @@ static MaterialLib LoadMaterialLib(const std::string& path)
 			assert(match.size() == 2);
 			current->d = std::stof(match[1]);
 		}
+		else if (line.starts_with("illum "))
+		{
+			std::smatch match;
+			std::regex_match(line, match, illumRegex);
+			assert(match.size() == 2);
+			current->illum = std::stoi(match[1]);
+		}
+		else if (line.starts_with("map_Kd "))
+		{
+			std::smatch match;
+			std::regex_match(line, match, mapKdRegex);
+			assert(match.size() == 2);
+			current->mapKd = LoadPngTexture(path.parent_path() / match[1].str());
+		}
+		else if (line.starts_with("map_Bump "))
+		{
+			std::smatch match;
+			std::regex_match(line, match, mapBumpRegex);
+			assert(match.size() == 2);
+			current->mapBump = LoadPngTexture(path.parent_path() / match[1].str());
+		}
+		else if (line.starts_with("map_Ks "))
+		{
+			std::smatch match;
+			std::regex_match(line, match, mapKsRegex);
+			assert(match.size() == 2);
+			current->mapKs = LoadPngTexture(path.parent_path() / match[1].str());
+		}
 	}
 
 	return lib;
 }
-	
+
+
 // read vertex data from obj
 Model LoadModel(const std::string& path)
 {
@@ -124,7 +190,7 @@ Model LoadModel(const std::string& path)
 			assert(match.size() == 2);
 			std::filesystem::path p = path;
 			p = p.parent_path() / match[1].str();
-			table = LoadMaterialLib(p.string());
+			table = LoadMaterialLib(p);
 		}
 		else if (line.starts_with("v "))
 		{
