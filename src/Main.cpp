@@ -51,7 +51,7 @@ void Normalize(Islander::Model& model)
 
 int main()
 {
-	Islander::Model model = Islander::LoadModel("Assets/nanosuit.obj");
+	Islander::Model model = Islander::LoadModel("assets/nanosuit.obj");
 
 	Normalize(model);
 
