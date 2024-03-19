@@ -255,6 +255,17 @@ Model LoadModel(const std::string& path)
 		}
 	}
 
+	//std::cout << "Number of meshes: " << model.meshes.size() << std::endl;
+	//model.meshes = {
+	//	std::move(model.meshes[0]),  // eyeglass
+	//	std::move(model.meshes[1]),  // legs
+	//	std::move(model.meshes[2]),  // hands
+	//	std::move(model.meshes[3]),  // eyeglass edge
+	//	std::move(model.meshes[4]),  // arms
+	//	std::move(model.meshes[5]),  // head
+	//	std::move(model.meshes[6]),  // body
+	//};
+
 	return model;
 }
 

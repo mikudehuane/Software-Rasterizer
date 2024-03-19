@@ -124,10 +124,17 @@ Color ColorBuffer::Sample(const Vec2& uv) const
     const float u = uv.x * static_cast<float>(m_Width);
 	const float v = uv.y * static_cast<float>(m_Height);
 
-    const int u0 = Clamp(static_cast<int>(u), 0, m_Width - 1);
-    const int v0 = Clamp(static_cast<int>(v), 0, m_Height - 1);
-    const int u1 = std::min(u0 + 1, m_Width - 1);
-    const int v1 = std::min(v0 + 1, m_Height - 1);
+    int u0 = static_cast<int>(u);
+    int v0 = static_cast<int>(v);
+    // -x % y is undefined in c++, and did not appear in testcase
+    assert(u0 >= 0);
+    assert(v0 >= 0);
+    int u1 = u0 + 1;
+    int v1 = v0 + 1;
+    u0 = u0 % m_Width;
+    v0 = v0 % m_Height;
+    u1 = u1 % m_Width;
+    v1 = v1 % m_Height;
     const float xRatio = u - static_cast<float>(u0);
     const float yRatio = v - static_cast<float>(v0);
 

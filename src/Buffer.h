@@ -92,7 +92,7 @@ public:
 		return m_Data[index.first * m_Width + index.second];
 	}
 
-	// Sample bilinearly
+	// Sample bilinearly, uv as loop
 	[[nodiscard]]
 	Color Sample(const Vec2& uv) const;
 
