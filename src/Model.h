@@ -16,10 +16,8 @@ struct Material
 {
 	// specular exponent
 	float ns;
-	// ambient diffuse specular term
-	Vec3 ka, kd, ks;
+	Vec3 ka;
 	std::shared_ptr<ColorBuffer> mapKd;
-	std::shared_ptr<ColorBuffer> mapBump;
 	std::shared_ptr<ColorBuffer> mapKs;
 };
 

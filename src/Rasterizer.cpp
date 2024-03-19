@@ -130,7 +130,13 @@ void Rasterizer::FragmentShading()
 			const Vec3 normal = w0 * m_Triangle->v0.normal
 				+ w1 * m_Triangle->v1.normal
 				+ w2 * m_Triangle->v2.normal;
-			const Vec3 shaded = PhongShading(*m_Material, texCoord, normal);
+			// camera is at origin
+			const Vec3 viewDir = Normalize(
+				-w0 * m_Triangle->v0.position
+				- w1 * m_Triangle->v1.position
+				- w2 * m_Triangle->v2.position
+			);
+			const Vec3 shaded = PhongShading(*m_Material, texCoord, normal, viewDir);
 			m_ColorBuffer[{m_Y, m_X}] = static_cast<Color>(shaded);
 		}
 	}

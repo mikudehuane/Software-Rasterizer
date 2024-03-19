@@ -56,15 +56,16 @@ void Normalize(Islander::Model& model)
 	}
 }
 
-int main()
+int main(int argc, char* argv[])
 {
 	Islander::Model model = Islander::LoadModel("assets/nanosuit.obj");
 
 	Normalize(model);
 
-	Islander::Rasterizer rasterizer(720, 720);
+	constexpr int resolution = 4096;
+	Islander::Rasterizer rasterizer(resolution, resolution);
 	rasterizer.Render(model);
-	rasterizer.GetDepthBuffer().DumpBmp("depth.bmp");
-	rasterizer.GetColorBuffer().DumpBmp("color.bmp");
+	//rasterizer.GetDepthBuffer().DumpBmp("depth.bmp");
+	rasterizer.GetColorBuffer().DumpBmp("result.bmp");
 }
 

@@ -96,17 +96,17 @@ static MaterialLib LoadMaterialLib(const std::filesystem::path& path)
 		}
 		else if (line.starts_with("Kd "))
 		{
-			std::smatch match;
-			std::regex_match(line, match, kdRegex);
-			assert(match.size() == 4);
-			current->kd = { std::stof(match[1]), std::stof(match[2]), std::stof(match[3]) };
+			//std::smatch match;
+			//std::regex_match(line, match, kdRegex);
+			//assert(match.size() == 4);
+			//current->kd = { std::stof(match[1]), std::stof(match[2]), std::stof(match[3]) };
 		}
 		else if (line.starts_with("Ks "))
 		{
-			std::smatch match;
-			std::regex_match(line, match, ksRegex);
-			assert(match.size() == 4);
-			current->ks = { std::stof(match[1]), std::stof(match[2]), std::stof(match[3]) };
+			//std::smatch match;
+			//std::regex_match(line, match, ksRegex);
+			//assert(match.size() == 4);
+			//current->ks = { std::stof(match[1]), std::stof(match[2]), std::stof(match[3]) };
 		}
 		else if (line.starts_with("Ni "))
 		{
@@ -129,10 +129,10 @@ static MaterialLib LoadMaterialLib(const std::filesystem::path& path)
 		}
 		else if (line.starts_with("map_Bump "))
 		{
-			std::smatch match;
-			std::regex_match(line, match, mapBumpRegex);
-			assert(match.size() == 2);
-			current->mapBump = LoadPngTexture(path.parent_path() / match[1].str());
+			//std::smatch match;
+			//std::regex_match(line, match, mapBumpRegex);
+			//assert(match.size() == 2);
+			//current->mapBump = LoadPngTexture(path.parent_path() / match[1].str());
 		}
 		else if (line.starts_with("map_Ks "))
 		{
@@ -158,6 +158,8 @@ static MaterialLib LoadMaterialLib(const std::filesystem::path& path)
 // read vertex data from obj
 Model LoadModel(const std::string& path)
 {
+	stbi_set_flip_vertically_on_load(true);
+
 	std::vector<Vec3> positions;
 	std::vector<Vec3> normals;
 	std::vector<Vec2> texCoords;
