@@ -119,10 +119,21 @@ void Rasterizer::FragmentShading()
 		const float z = w0 * m_Triangle->v0.position.z
 			+ w1 * m_Triangle->v1.position.z
 			+ w2 * m_Triangle->v2.position.z;
-		if (float& element = m_DepthBuffer[{m_Y, m_X}];
-			z > element)  // depth checking
+		float& element = m_DepthBuffer[{m_Y, m_X}];
+		if (z > element)  // depth checking
 		{
 			element = z;
+			if (m_Material->mapKd != nullptr)
+			{
+				const Vec2 texCoord = w0 * m_Triangle->v0.texCoord
+					+ w1 * m_Triangle->v1.texCoord
+					+ w2 * m_Triangle->v2.texCoord;
+				m_ColorBuffer[{m_Y, m_X}] = m_Material->mapKd->Sample(texCoord);
+			}
+			else
+			{
+				m_ColorBuffer[{m_Y, m_X}] = { 0, 0, 0, 255 };
+			}
 		}
 	}
 }
@@ -131,6 +142,7 @@ void Rasterizer::Render(const Model& model)
 {
 	for (const Mesh& mesh : model.meshes)
 	{
+		m_Material = mesh.material.get();
 		for (const Triangle& triangle : mesh.triangles)
 		{
 			Triangle transformed = triangle;

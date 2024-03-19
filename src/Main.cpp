@@ -58,5 +58,6 @@ int main()
 	Islander::Rasterizer rasterizer(720, 720);
 	rasterizer.Render(model);
 	rasterizer.GetDepthBuffer().DumpBmp("depth.bmp");
+	rasterizer.GetColorBuffer().DumpBmp("color.bmp");
 }
 
