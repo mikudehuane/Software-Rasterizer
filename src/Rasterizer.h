@@ -16,8 +16,8 @@ public:
 
 	void Render(const Model& model);
 
-	const DepthBuffer& GetDepthBuffer() const { return m_DepthBuffer; }
-	const ColorBuffer& GetColorBuffer() const { return m_ColorBuffer; }
+	[[nodiscard]] const DepthBuffer& GetDepthBuffer() const { return m_DepthBuffer; }
+	[[nodiscard]] const ColorBuffer& GetColorBuffer() const { return m_ColorBuffer; }
 private:
 	[[nodiscard]] float GetY(const float y) const
 	{
@@ -34,10 +34,23 @@ private:
 	// -1 ~ 1 -> screen coordinate
 	void TransformToScreen(Triangle& triangle) const;
 
-	void Rasterize(const Triangle& triangle);
+	void Rasterize();
+	void FragmentShading();
 
 	DepthBuffer m_DepthBuffer;
 	ColorBuffer m_ColorBuffer;
+
+	// runtime states
+	const Material* m_Material = nullptr;
+	const Triangle* m_Triangle = nullptr;
+	const Vec2* m_V0 = nullptr;
+	const Vec2* m_V1 = nullptr;
+	const Vec2* m_V2 = nullptr;
+	const Vec2* m_VMid = nullptr;   // y is middle
+	const Vec2* m_VTop = nullptr;   // y is highest
+	Vec2 m_P = { 0.0f, 0.0f };  // rendering point
+	float m_Area = 0.0f;  // triangle area
+	int m_X = 0, m_Y = 0;  // screen coordinate
 };
 
 }

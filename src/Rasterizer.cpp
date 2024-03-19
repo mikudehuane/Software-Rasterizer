@@ -31,112 +31,100 @@ void SortTriangle(Triangle& triangle)
 	}
 }
 
-void Rasterizer::Rasterize(const Triangle& triangle)
+void Rasterizer::Rasterize()
 {
 	constexpr float eps = 1e-7f;
 
-	const Vec2& v0 = *reinterpret_cast<const Vec2*>(&triangle.v0);
-	const Vec2& v1 = *reinterpret_cast<const Vec2*>(&triangle.v1);
-	const Vec2& v2 = *reinterpret_cast<const Vec2*>(&triangle.v2);
-	const Vec2& vMid = v1.y < v2.y ? v1 : v2;  // y is middle
-	const Vec2& vTop = v1.y < v2.y ? v2 : v1;  // y is highest
+	m_V0 = reinterpret_cast<const Vec2*>(&m_Triangle->v0.position);
+	m_V1 = reinterpret_cast<const Vec2*>(&m_Triangle->v1.position);
+	m_V2 = reinterpret_cast<const Vec2*>(&m_Triangle->v2.position);
+	m_VMid = m_V1->y < m_V2->y ? m_V1 : m_V2;
+	m_VTop = m_V1->y < m_V2->y ? m_V2 : m_V1;
 
-	const float yMin = std::max(v0.y, 0.0f);
-	const float yMax = std::min(vTop.y, static_cast<float>(m_DepthBuffer.Height() - 1));
-	const float yMid = std::max(yMin, std::min(yMax, vMid.y));
+	const float yMin = std::max(m_V0->y, 0.0f);
+	const float yMax = std::min(m_VTop->y, static_cast<float>(m_DepthBuffer.Height() - 1));
+	const float yMid = std::max(yMin, std::min(yMax, m_VMid->y));
 
 	// v01 x v02
-	const float area = Cross(v1 - v0, v2 - v0);
+	m_Area = Cross(*m_V1 - *m_V2, *m_V2 - *m_V0);
 
 	// lower half
 	{
-		float tLeft = (v2.x - v0.x) / (v2.y - v0.y + eps);
-		float tRight = (v1.x - v0.x) / (v1.y - v0.y + eps);
+		float tLeft = (m_V2->x - m_V0->x) / (m_V2->y - m_V0->y + eps);
+		float tRight = (m_V1->x - m_V0->x) / (m_V1->y - m_V0->y + eps);
 		if (tLeft > tRight)
 		{
 			std::swap(tLeft, tRight);
 		}
-		for (int y = static_cast<int>(yMin); y < static_cast<int>(yMid); ++y)
+		for (m_Y = static_cast<int>(yMin); m_Y < static_cast<int>(yMid); ++m_Y)
 		{
-			const float yCoord = static_cast<float>(y) + 0.5f;
-			const float yDiff = yCoord - v0.y;
-			float xMin = tLeft * yDiff + triangle.v0.position.x;
-			float xMax = tRight * yDiff + triangle.v0.position.x;
+			const float yCoord = static_cast<float>(m_Y) + 0.5f;
+			const float yDiff = yCoord - m_V0->y;
+			float xMin = tLeft * yDiff + m_V0->x;
+			float xMax = tRight * yDiff + m_V0->x;
 			xMin = std::max(0.0f, xMin);
 			xMax = std::min(static_cast<float>(m_DepthBuffer.Width() - 1), xMax);
 
-			for (int x = static_cast<int>(xMin); static_cast<float>(x) <= xMax; ++x)
+			for (m_X = static_cast<int>(xMin); static_cast<float>(m_X) <= xMax; ++m_X)
 			{
 				// pixel (x, y): coordinate (x + 0.5, y + 0.5)
-				const Vec2 p = { static_cast<float>(x) + 0.5f, yCoord };
-
-				// bi-centric coordinates of (xCoord, yCoord) in triangle
-				// p-1 x p-2
-				const float w0 = Cross(v1 - p, v2 - p) / area;
-				// 0-p x 0-2
-				const float w1 = Cross(p - v0, v2 - v0) / area;
-				// ReSharper disable once CppTooWideScopeInitStatement
-				const float w2 = 1 - w0 - w1;
-
-				// fragment shade only inside triangle
-				if (w0 >= 0 && w1 >= 0 && w2 >= 0)
-				{
-					const float z = w0 * triangle.v0.position.z + w1 * triangle.v1.position.z + w2 * triangle.v2.position.z;
-					if (float& element = m_DepthBuffer[{y, x}];
-						z > element)
-					{
-						element = z;
-					}
-				}
+				m_P = { static_cast<float>(m_X) + 0.5f, yCoord };
+				FragmentShading();
 			}
 		}
 	}
 
 	// higher half
 	{
-		float tLeft = (vMid.x - vTop.x) / (vMid.y - vTop.y + eps);
-		float tRight = (v0.x - vTop.x) / (v0.y - vTop.y + eps);
+		float tLeft = (m_VMid->x - m_VTop->x) / (m_VMid->y - m_VTop->y + eps);
+		float tRight = (m_V0->x - m_VTop->x) / (m_V0->y - m_VTop->y + eps);
 		if (tLeft < tRight)
 		{
 			std::swap(tLeft, tRight);
 		}
 
-		for (int y = static_cast<int>(yMid); y <= static_cast<int>(yMax); ++y)
+		for (m_Y = static_cast<int>(yMid); m_Y <= static_cast<int>(yMax); ++m_Y)
 		{
-			const float yCoord = static_cast<float>(y) + 0.5f;
-			const float yDiff = yCoord - vTop.y;
-			float xMin = tLeft * yDiff + vTop.x;
-			float xMax = tRight * yDiff + vTop.x;
+			const float yCoord = static_cast<float>(m_Y) + 0.5f;
+			const float yDiff = yCoord - m_VTop->y;
+			float xMin = tLeft * yDiff + m_VTop->x;
+			float xMax = tRight * yDiff + m_VTop->x;
 			xMin = std::max(0.0f, xMin);
 			xMax = std::min(static_cast<float>(m_DepthBuffer.Width() - 1), xMax);
 
-			for (int x = static_cast<int>(xMin); x <= static_cast<int>(xMax); ++x)
+			for (m_X = static_cast<int>(xMin); m_X <= static_cast<int>(xMax); ++m_X)
 			{
 				// pixel (x, y): coordinate (x + 0.5, y + 0.5)
-				const Vec2 p = { static_cast<float>(x) + 0.5f, yCoord };
-
-				// bi-centric coordinates of (xCoord, yCoord) in triangle
-				// p-1 x p-2
-				const float w0 = Cross(v1 - p, v2 - p) / area;
-				// 0-p x 0-2
-				const float w1 = Cross(p - v0, v2 - v0) / area;
-				// ReSharper disable once CppTooWideScopeInitStatement
-				const float w2 = 1 - w0 - w1;
-
-				// fragment shade only inside triangle
-				if (w0 >= 0 && w1 >= 0 && w2 >= 0)
-				{
-					const float z = w0 * triangle.v0.position.z + w1 * triangle.v1.position.z + w2 * triangle.v2.position.z;
-					if (float& element = m_DepthBuffer[{y, x}];
-						z > element)
-					{
-						element = z;
-					}
-				}
+				m_P = { static_cast<float>(m_X) + 0.5f, yCoord };
+				FragmentShading();
 			}
 		}
 	}
 
+}
+
+void Rasterizer::FragmentShading()
+{
+	// bi-centric coordinates of (xCoord, yCoord) in triangle
+	// p-1 x p-2
+	const float w0 = Cross(*m_V1 - m_P, *m_V2 - m_P) / m_Area;
+	// 0-p x 0-2
+	const float w1 = Cross(m_P - *m_V0, *m_V2 - *m_V0) / m_Area;
+	// ReSharper disable once CppTooWideScopeInitStatement
+	const float w2 = 1 - w0 - w1;
+
+	// fragment shade only inside triangle
+	if (w0 >= 0 && w1 >= 0 && w2 >= 0)
+	{
+		const float z = w0 * m_Triangle->v0.position.z
+			+ w1 * m_Triangle->v1.position.z
+			+ w2 * m_Triangle->v2.position.z;
+		if (float& element = m_DepthBuffer[{m_Y, m_X}];
+			z > element)  // depth checking
+		{
+			element = z;
+		}
+	}
 }
 
 void Rasterizer::Render(const Model& model)
@@ -148,7 +136,8 @@ void Rasterizer::Render(const Model& model)
 			Triangle transformed = triangle;
 			SortTriangle(transformed);
 			TransformToScreen(transformed);
-			Rasterize(transformed);
+			m_Triangle = &transformed;
+			Rasterize();
 		}
 	}
 }
