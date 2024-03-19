@@ -49,10 +49,11 @@ struct Color
 	uint8_t r = 0, g = 0, b = 0, a = 255;
 	explicit Color(const Vec3& color);
 	Color() = default;
-	Color(uint8_t r, uint8_t g, uint8_t b, uint8_t a = 255)
+	Color(const uint8_t r, const uint8_t g, const uint8_t b, const uint8_t a = 255)
 		: r(r), g(g), b(b), a(a)
 	{
 	}
+	[[nodiscard]] Vec3 ToVec3() const;
 };
 
 // pass color by value since its only 4 byte
@@ -94,8 +95,6 @@ public:
 	// Sample bilinearly
 	[[nodiscard]]
 	Color Sample(const Vec2& uv) const;
-	[[nodiscard]]
-	Vec3 SampleVec3(const Vec2& uv) const;
 
 	[[nodiscard]] int Width() const { return m_Width; }
 	[[nodiscard]] int Height() const { return m_Height; }

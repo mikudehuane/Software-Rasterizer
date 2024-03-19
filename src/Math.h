@@ -38,6 +38,11 @@ inline Vec3 operator*(const float opLeft, const Vec3& opRight)
 	return { opLeft * opRight.x, opLeft * opRight.y, opLeft * opRight.z };
 }
 
+inline Vec3 operator+(const Vec3& opLeft, const Vec3& opRight)
+{
+	return { opLeft.x + opRight.x, opLeft.y + opRight.y, opLeft.z + opRight.z };
+}
+
 inline float Dot(const Vec3& opLeft, const Vec3& opRight)
 {
 	return opLeft.x * opRight.x + opLeft.y * opRight.y + opLeft.z * opRight.z;

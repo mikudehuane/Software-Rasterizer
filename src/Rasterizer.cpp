@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include "Model.h"
+#include "Shaders.h"
 
 namespace Islander
 {
@@ -123,17 +124,14 @@ void Rasterizer::FragmentShading()
 		if (z > element)  // depth checking
 		{
 			element = z;
-			if (m_Material->mapKd != nullptr)
-			{
-				const Vec2 texCoord = w0 * m_Triangle->v0.texCoord
-					+ w1 * m_Triangle->v1.texCoord
-					+ w2 * m_Triangle->v2.texCoord;
-				m_ColorBuffer[{m_Y, m_X}] = m_Material->mapKd->Sample(texCoord);
-			}
-			else
-			{
-				m_ColorBuffer[{m_Y, m_X}] = { 0, 0, 0, 255 };
-			}
+			const Vec2 texCoord = w0 * m_Triangle->v0.texCoord
+				+ w1 * m_Triangle->v1.texCoord
+				+ w2 * m_Triangle->v2.texCoord;
+			const Vec3 normal = w0 * m_Triangle->v0.normal
+				+ w1 * m_Triangle->v1.normal
+				+ w2 * m_Triangle->v2.normal;
+			const Vec3 shaded = PhongShading(*m_Material, texCoord, normal);
+			m_ColorBuffer[{m_Y, m_X}] = static_cast<Color>(shaded);
 		}
 	}
 }

@@ -109,6 +109,15 @@ Color::Color(const Vec3& color)
 {
 }
 
+Vec3 Color::ToVec3() const
+{
+    return {
+    	static_cast<float>(r) / 255.0f,
+		static_cast<float>(g) / 255.0f,
+		static_cast<float>(b) / 255.0f
+    };
+}
+
 Color ColorBuffer::Sample(const Vec2& uv) const
 {
     // sample bilinearly
@@ -130,16 +139,6 @@ Color ColorBuffer::Sample(const Vec2& uv) const
     const Color c0 = Lerp(c00, c01, xRatio);
     const Color c1 = Lerp(c10, c11, xRatio);
     return Lerp(c0, c1, yRatio);
-}
-
-Vec3 ColorBuffer::SampleVec3(const Vec2& uv) const
-{
-    const Color color = Sample(uv);
-    return {
-        static_cast<float>(color.b) / 255.0f,
-        static_cast<float>(color.g) / 255.0f,
-        static_cast<float>(color.r) / 255.0f
-    };
 }
 
 void ColorBuffer::DumpBmp(const std::string& path) const

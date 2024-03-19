@@ -6,14 +6,13 @@
 namespace Islander
 {
 
-Vec3 PhongShading(const Material& material, const Vec2& texCoord, const Vec3& normal, const Vec3& lightDir,
-	const Vec3& eyeDir)
+Vec3 PhongShading(const Material& material, const Vec2& texCoord, const Vec3& normal)
 {
 	// sample textures
 	Vec3 diffuse = { 0.0f, 0.0f, 0.0f };
 	if (material.mapKd != nullptr)
 	{
-		diffuse = material.mapKd->SampleVec3(texCoord);
+		diffuse = material.mapKd->Sample(texCoord).ToVec3();
 	}
 
 	return diffuse;
