@@ -33,8 +33,9 @@ static std::shared_ptr<ColorBuffer> LoadPngTexture(const std::filesystem::path& 
 		for (int j = 0; j < width; ++j)
 		{
 			const int index = (i * width + j) * nChannel;
+			// color is stored as bgr
 			Color color(
-				data[index], data[index + 1], data[index + 2], 255
+				data[index + 2], data[index + 1], data[index], 255
 			);
 			if (nChannel == 4)
 			{
@@ -64,6 +65,7 @@ static MaterialLib LoadMaterialLib(const std::filesystem::path& path)
 	std::regex mapKdRegex(R"(map_Kd (.+))");
 	std::regex mapBumpRegex(R"(map_Bump (.+))");
 	std::regex mapKsRegex(R"(map_Ks (.+))");
+	std::regex spaceRegex(R"(\s*)");
 
 	std::ifstream fin(path);
 	std::string line;
@@ -108,24 +110,15 @@ static MaterialLib LoadMaterialLib(const std::filesystem::path& path)
 		}
 		else if (line.starts_with("Ni "))
 		{
-			std::smatch match;
-			std::regex_match(line, match, niRegex);
-			assert(match.size() == 2);
-			current->ni = std::stof(match[1]);
+			// we do not deal with this
 		}
 		else if (line.starts_with("d "))
 		{
-			std::smatch match;
-			std::regex_match(line, match, dRegex);
-			assert(match.size() == 2);
-			current->d = std::stof(match[1]);
+			// we do not deal with this
 		}
 		else if (line.starts_with("illum "))
 		{
-			std::smatch match;
-			std::regex_match(line, match, illumRegex);
-			assert(match.size() == 2);
-			current->illum = std::stoi(match[1]);
+			// always Blinn-Phong
 		}
 		else if (line.starts_with("map_Kd "))
 		{
@@ -147,6 +140,14 @@ static MaterialLib LoadMaterialLib(const std::filesystem::path& path)
 			std::regex_match(line, match, mapKsRegex);
 			assert(match.size() == 2);
 			current->mapKs = LoadPngTexture(path.parent_path() / match[1].str());
+		}
+		else if (line.starts_with("# ") || std::regex_match(line, spaceRegex))
+		{
+			// comment or space
+		}
+		else
+		{
+			assert(false);  // illegal syntax
 		}
 	}
 

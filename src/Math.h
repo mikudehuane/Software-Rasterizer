@@ -23,7 +23,7 @@ inline Vec2 operator-(const Vec2& opLeft, const Vec2& opRight)
 	return { opLeft.x - opRight.x, opLeft.y - opRight.y };
 }
 
-inline Vec2 operator*(float opLeft, const Vec2& opRight)
+inline Vec2 operator*(const float opLeft, const Vec2& opRight)
 {
 	return { opLeft * opRight.x, opLeft * opRight.y };
 }
@@ -31,6 +31,16 @@ inline Vec2 operator*(float opLeft, const Vec2& opRight)
 inline Vec2 operator+(const Vec2& opLeft, const Vec2& opRight)
 {
 	return { opLeft.x + opRight.x, opLeft.y + opRight.y };
+}
+
+inline Vec3 operator*(const float opLeft, const Vec3& opRight)
+{
+	return { opLeft * opRight.x, opLeft * opRight.y, opLeft * opRight.z };
+}
+
+inline float Dot(const Vec3& opLeft, const Vec3& opRight)
+{
+	return opLeft.x * opRight.x + opLeft.y * opRight.y + opLeft.z * opRight.z;
 }
 
 inline float Clamp(const float value, const float min, const float max)

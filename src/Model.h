@@ -14,11 +14,10 @@ class ColorBuffer;
 
 struct Material
 {
+	// specular exponent
 	float ns;
+	// ambient diffuse specular term
 	Vec3 ka, kd, ks;
-	float ni;
-	float d;
-	int illum;
 	std::shared_ptr<ColorBuffer> mapKd;
 	std::shared_ptr<ColorBuffer> mapBump;
 	std::shared_ptr<ColorBuffer> mapKs;

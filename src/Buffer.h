@@ -94,6 +94,8 @@ public:
 	// Sample bilinearly
 	[[nodiscard]]
 	Color Sample(const Vec2& uv) const;
+	[[nodiscard]]
+	Vec3 SampleVec3(const Vec2& uv) const;
 
 	[[nodiscard]] int Width() const { return m_Width; }
 	[[nodiscard]] int Height() const { return m_Height; }
